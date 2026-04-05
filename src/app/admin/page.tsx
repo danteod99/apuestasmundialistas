@@ -1,7 +1,9 @@
 "use client";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { MOCK_RESERVATIONS, getMonthStats, getBookingsBySport, getRevenueLast7Days } from "@/lib/admin-data";
-import { COURTS } from "@/lib/data";
+import { fetchReservations, fetchCourts } from "@/lib/supabase-queries";
+import { getMonthStats, getBookingsBySport, getRevenueLast7Days } from "@/lib/admin-data";
+import type { Reservation, Court } from "@/lib/data";
 import StatCard from "@/components/admin/StatCard";
 import BarChart from "@/components/admin/BarChart";
 
@@ -12,14 +14,34 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 export default function AdminDashboard() {
-  const stats = getMonthStats(MOCK_RESERVATIONS);
-  const bookingsBySport = getBookingsBySport(MOCK_RESERVATIONS);
-  const revenueDays = getRevenueLast7Days(MOCK_RESERVATIONS);
-  const recentReservations = MOCK_RESERVATIONS.filter(r => r.status !== "cancelada").slice(0, 5);
+  const [reservations, setReservations] = useState<Reservation[]>([]);
+  const [courts, setCourts] = useState<Court[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.all([fetchReservations(), fetchCourts()])
+      .then(([res, cts]) => {
+        setReservations(res);
+        setCourts(cts);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="w-8 h-8 border-4 border-green-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  const stats = getMonthStats(reservations);
+  const bookingsBySport = getBookingsBySport(reservations);
+  const revenueDays = getRevenueLast7Days(reservations);
+  const recentReservations = reservations.filter(r => r.status !== "cancelada").slice(0, 5);
 
   return (
     <div>
-      {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
         <StatCard
           title="Ingresos del Mes"
@@ -38,7 +60,7 @@ export default function AdminDashboard() {
         <StatCard
           title="Tasa de Ocupación"
           value={`${stats.occupancyRate}%`}
-          subtitle={`${COURTS.length} canchas activas`}
+          subtitle={`${courts.length} canchas activas`}
           icon={<span>📊</span>}
           borderColor="border-l-purple-500"
         />
@@ -51,13 +73,11 @@ export default function AdminDashboard() {
         />
       </div>
 
-      {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mt-6">
         <BarChart title="Reservas por Deporte" data={bookingsBySport} variant="horizontal" />
         <BarChart title="Ingresos - Últimos 7 Días" data={revenueDays} variant="vertical" />
       </div>
 
-      {/* Recent Reservations */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 mt-6 overflow-hidden">
         <div className="flex items-center justify-between p-5 border-b border-gray-100">
           <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-400">Reservas Recientes</h3>
@@ -79,7 +99,7 @@ export default function AdminDashboard() {
             </thead>
             <tbody className="divide-y divide-gray-50">
               {recentReservations.map((r) => {
-                const court = COURTS.find(c => c.id === r.courtId);
+                const court = courts.find(c => c.id === r.courtId);
                 return (
                   <tr key={r.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-5 py-3 font-mono text-xs font-bold text-gray-900">{r.code}</td>
@@ -95,6 +115,9 @@ export default function AdminDashboard() {
                   </tr>
                 );
               })}
+              {recentReservations.length === 0 && (
+                <tr><td colSpan={6} className="px-5 py-8 text-center text-gray-400">No hay reservas aún</td></tr>
+              )}
             </tbody>
           </table>
         </div>

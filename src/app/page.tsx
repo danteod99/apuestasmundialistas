@@ -1,10 +1,18 @@
+"use client";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { COURTS, AMENITIES, BENEFITS, SPORTS_INFO } from "@/lib/data";
+import { AMENITIES, BENEFITS, SPORTS_INFO, type Court } from "@/lib/data";
+import { fetchActiveCourts } from "@/lib/supabase-queries";
 
 export default function Home() {
   const sportGroups = Object.entries(SPORTS_INFO);
+  const [courts, setCourts] = useState<Court[]>([]);
+
+  useEffect(() => {
+    fetchActiveCourts().then(setCourts);
+  }, []);
 
   return (
     <>
@@ -163,7 +171,7 @@ export default function Home() {
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {COURTS.map((court) => (
+            {courts.map((court) => (
               <div key={court.id} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all group">
                 <div className="relative h-48 bg-gray-200 overflow-hidden">
                   <img

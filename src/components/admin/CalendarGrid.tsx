@@ -69,7 +69,9 @@ export default function CalendarGrid({ reservations, courts, weekStart, courtFil
         <div className="grid grid-cols-8 gap-px bg-gray-200 rounded-t-xl overflow-hidden">
           <div className="bg-gray-50 p-2 text-xs font-semibold text-gray-400 text-center">Hora</div>
           {weekDates.map((date, i) => {
-            const isToday = date === "2026-04-04";
+            const today = new Date();
+            const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,"0")}-${String(today.getDate()).padStart(2,"0")}`;
+            const isToday = date === todayStr;
             return (
               <div
                 key={date}

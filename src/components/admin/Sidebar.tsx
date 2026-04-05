@@ -1,5 +1,7 @@
 "use client";
 import Link from "next/link";
+import { useAuth } from "@/lib/auth-context";
+import { useRouter } from "next/navigation";
 
 interface SidebarProps {
   currentPath: string;
@@ -31,6 +33,14 @@ function NavIcon({ type }: { type: string }) {
 }
 
 export default function Sidebar({ currentPath, open, onClose }: SidebarProps) {
+  const { signOut } = useAuth();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await signOut();
+    router.push("/login");
+  };
+
   const sidebarContent = (
     <div className="flex flex-col h-full">
       <div className="p-6 border-b border-gray-700">
@@ -64,7 +74,7 @@ export default function Sidebar({ currentPath, open, onClose }: SidebarProps) {
         })}
       </nav>
 
-      <div className="border-t border-gray-700 p-4">
+      <div className="border-t border-gray-700 p-4 space-y-1">
         <Link
           href="/"
           className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors px-2 py-2"
@@ -74,6 +84,15 @@ export default function Sidebar({ currentPath, open, onClose }: SidebarProps) {
           </svg>
           Volver al Sitio
         </Link>
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-2 text-sm text-red-400 hover:text-red-300 transition-colors px-2 py-2 w-full"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+          Cerrar Sesión
+        </button>
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 "use client";
+import { useAuth } from "@/lib/auth-context";
 
 interface AdminHeaderProps {
   title: string;
@@ -6,6 +7,9 @@ interface AdminHeaderProps {
 }
 
 export default function AdminHeader({ title, onMenuToggle }: AdminHeaderProps) {
+  const { user } = useAuth();
+  const initial = user?.email?.charAt(0).toUpperCase() || "A";
+
   return (
     <header className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-30">
       <div className="flex items-center justify-between px-4 sm:px-6 h-16">
@@ -22,9 +26,9 @@ export default function AdminHeader({ title, onMenuToggle }: AdminHeaderProps) {
         </div>
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-green-600 flex items-center justify-center text-white text-sm font-bold">
-            A
+            {initial}
           </div>
-          <span className="text-sm text-gray-600 hidden sm:block">Admin</span>
+          <span className="text-sm text-gray-600 hidden sm:block">{user?.email || "Admin"}</span>
         </div>
       </div>
     </header>
