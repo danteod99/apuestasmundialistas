@@ -1,4 +1,23 @@
 export type Sport = "futbol7" | "futbol9" | "futbol11" | "voley" | "basquet";
+export type ReservationStatus = "confirmada" | "pendiente" | "cancelada";
+export type PaymentMethod = "card" | "yape" | "plin";
+
+export interface Reservation {
+  id: string;
+  code: string;
+  courtId: string;
+  sport: Sport;
+  date: string;
+  time: string;
+  duration: number;
+  customerName: string;
+  customerPhone: string;
+  customerEmail: string;
+  paymentMethod: PaymentMethod;
+  amount: number;
+  status: ReservationStatus;
+  createdAt: string;
+}
 
 export interface Court {
   id: string;
